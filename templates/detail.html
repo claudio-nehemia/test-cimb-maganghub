@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}Detail Tugas #{{ task.id }} - {{ task.title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-9">
+
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb small">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}" class="text-decoration-none">Dashboard</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Detail Tugas #{{ task.id }}</li>
+            </ol>
+        </nav>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <!-- Header Card Detail -->
+            <div class="card-header bg-white py-3 border-bottom d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                <div>
+                    <span class="badge bg-secondary-subtle text-secondary me-2">ID #{{ task.id }}</span>
+                    <span class="badge bg-primary-subtle text-primary border">{{ task.department }}</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    {% if task.priority == 'Tinggi' %}
+                        <span class="badge badge-priority-high"><i class="fa-solid fa-circle-exclamation me-1"></i> Prioritas Tinggi</span>
+                    {% elif task.priority == 'Sedang' %}
+                        <span class="badge badge-priority-medium"><i class="fa-solid fa-circle-dot me-1"></i> Prioritas Sedang</span>
+                    {% else %}
+                        <span class="badge badge-priority-low"><i class="fa-solid fa-arrow-down me-1"></i> Prioritas Rendah</span>
+                    {% endif %}
+
+                    {% if task.status == 'Selesai' %}
+                        <span class="badge badge-status-completed"><i class="fa-solid fa-circle-check me-1"></i> Selesai</span>
+                    {% elif task.status == 'Sedang Dikerjakan' %}
+                        <span class="badge badge-status-progress"><i class="fa-solid fa-arrows-rotate me-1 fa-spin"></i> Sedang Dikerjakan</span>
+                    {% else %}
+                        <span class="badge badge-status-pending"><i class="fa-regular fa-clock me-1"></i> Belum Dimulai</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <h3 class="fw-bold text-dark mb-3">{{ task.title }}</h3>
+
+                <!-- Informasi Utama Grid -->
+                <div class="row g-3 p-3 bg-light rounded-3 mb-4">
+                    <div class="col-6 col-md-3">
+                        <div class="text-muted small">Penanggung Jawab</div>
+                        <div class="fw-semibold text-dark mt-1">
+                            <i class="fa-regular fa-user text-primary me-1"></i> {{ task.assigned_to }}
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="text-muted small">Divisi / Departemen</div>
+                        <div class="fw-semibold text-dark mt-1">
+                            <i class="fa-regular fa-building text-primary me-1"></i> {{ task.department }}
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="text-muted small">Batas Waktu (Due Date)</div>
+                        <div class="fw-semibold text-dark mt-1">
+                            {% if task.due_date == today %}
+                                <span class="text-warning fw-bold"><i class="fa-solid fa-bolt me-1"></i> Hari Ini</span>
+                            {% elif task.due_date < today and task.status != 'Selesai' %}
+                                <span class="text-danger fw-bold"><i class="fa-solid fa-triangle-exclamation me-1"></i> {{ task.due_date.strftime('%d %b %Y') }} (Terlewat)</span>
+                            {% else %}
+                                <span><i class="fa-regular fa-calendar me-1 text-primary"></i> {{ task.due_date.strftime('%d %b %Y') }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="text-muted small">Waktu Penyelesaian</div>
+                        <div class="fw-semibold text-dark mt-1">
+                            {% if task.completed_at %}
+                                <span class="text-success"><i class="fa-solid fa-check me-1"></i> {{ task.completed_at.strftime('%d %b %Y, %H:%M') }}</span>
+                            {% else %}
+                                <span class="text-muted">- Belum Selesai -</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deskripsi Rinci -->
+                <div class="mb-4">
+                    <h6 class="fw-bold text-secondary text-uppercase small mb-2">Deskripsi & Keterangan Tugas</h6>
+                    <div class="p-3 border rounded bg-white" style="min-height: 120px; white-space: pre-wrap; line-height: 1.6;">
+                        {% if task.description %}
+                            {{ task.description }}
+                        {% else %}
+                            <span class="text-muted fst-italic">Tidak ada deskripsi tambahan yang dicatat untuk tugas ini.</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Riwayat Timestamp -->
+                <div class="row text-muted small pt-3 border-top mb-4">
+                    <div class="col-12 col-md-6 mb-1">
+                        <i class="fa-regular fa-clock me-1"></i> Dibuat pada: {{ task.created_at.strftime('%d %B %Y, %H:%M WIB') if task.created_at else '-' }}
+                    </div>
+                    <div class="col-12 col-md-6 text-md-end">
+                        <i class="fa-solid fa-clock-rotate-left me-1"></i> Terakhir diperbarui: {{ task.updated_at.strftime('%d %B %Y, %H:%M WIB') if task.updated_at else '-' }}
+                    </div>
+                </div>
+
+                <!-- Bar Aksi Tombol -->
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pt-3 border-top">
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                        <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Dashboard
+                    </a>
+                    
+                    <div class="d-flex flex-wrap gap-2">
+                        <!-- Quick Status Switch -->
+                        {% if task.status != 'Selesai' %}
+                            <form action="{{ url_for('quick_status', task_id=task.id) }}" method="POST" class="d-inline">
+                                <input type="hidden" name="status" value="Selesai">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fa-solid fa-check me-1"></i> Tandai Selesai
+                                </button>
+                            </form>
+                        {% else %}
+                            <form action="{{ url_for('quick_status', task_id=task.id) }}" method="POST" class="d-inline">
+                                <input type="hidden" name="status" value="Sedang Dikerjakan">
+                                <button type="submit" class="btn btn-outline-warning">
+                                    <i class="fa-solid fa-rotate-left me-1"></i> Buka Kembali Tugas
+                                </button>
+                            </form>
+                        {% endif %}
+
+                        <a href="{{ url_for('edit_task', task_id=task.id) }}" class="btn btn-primary">
+                            <i class="fa-regular fa-pen-to-square me-1"></i> Edit Tugas
+                        </a>
+
+                        <button type="button" class="btn btn-outline-danger" 
+                                onclick="confirmDelete('{{ task.id }}', '{{ task.title|replace("'", "\\'") }}')">
+                            <i class="fa-regular fa-trash-can me-1"></i> Hapus
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal Konfirmasi Hapus Tugas -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-danger">
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i> Konfirmasi Penghapusan
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-3">
+                <p class="text-secondary mb-2">Apakah Anda yakin ingin menghapus data tugas berikut secara permanen?</p>
+                <div class="alert alert-light border small text-dark fw-semibold" id="deleteTaskTitle"></div>
+                <small class="text-muted">Data yang telah dihapus tidak dapat dipulihkan kembali dari sistem.</small>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                <form id="deleteForm" method="POST" action="">
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        <i class="fa-regular fa-trash-can me-1"></i> Ya, Hapus Tugas
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

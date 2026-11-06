@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if action == 'create' %}Tambah Tugas Harian Baru{% else %}Edit Data Tugas #{{ task_id }}{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8 col-xl-7">
+
+        <!-- Navigasi Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb small">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}" class="text-decoration-none">Dashboard</a></li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    {% if action == 'create' %}Tambah Tugas Baru{% else %}Edit Tugas #{{ task_id }}{% endif %}
+                </li>
+            </ol>
+        </nav>
+
+        <!-- Kartu Formulir -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3 border-bottom">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-primary-subtle text-primary p-2 me-3 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                        {% if action == 'create' %}
+                            <i class="fa-solid fa-plus fs-5"></i>
+                        {% else %}
+                            <i class="fa-solid fa-pen fs-5"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0 text-dark">
+                            {% if action == 'create' %}Form Pencatatan Tugas Baru{% else %}Perbarui Data Tugas Harian{% endif %}
+                        </h5>
+                        <p class="text-muted small mb-0">Isi seluruh informasi detail tugas operasional perusahaan dengan lengkap.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <form method="POST" action="{% if action == 'create' %}{{ url_for('create_task') }}{% else %}{{ url_for('edit_task', task_id=task_id) }}{% endif %}">
+                    
+                    <!-- Judul Tugas -->
+                    <div class="mb-3">
+                        <label for="title" class="form-label fw-semibold text-secondary small">
+                            Judul Tugas <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control" id="title" name="title" 
+                               placeholder="Contoh: Rekonsiliasi Laporan Kas Masuk Mingguan" 
+                               value="{{ task.title or '' }}" required autofocus>
+                        <div class="form-text small">Tuliskan ringkasan pokok tugas secara padat dan jelas.</div>
+                    </div>
+
+                    <!-- Deskripsi Rinci -->
+                    <div class="mb-3">
+                        <label for="description" class="form-label fw-semibold text-secondary small">
+                            Deskripsi Rinci Pekerjaan
+                        </label>
+                        <textarea class="form-control" id="description" name="description" rows="4" 
+                                  placeholder="Tuliskan spesifikasi, catatan instruksi, atau kriteria penyelesaian tugas...">{{ task.description or '' }}</textarea>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <!-- Penanggung Jawab -->
+                        <div class="col-12 col-md-6">
+                            <label for="assigned_to" class="form-label fw-semibold text-secondary small">
+                                Penanggung Jawab (Staf) <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white text-muted"><i class="fa-regular fa-user"></i></span>
+                                <input type="text" class="form-control" id="assigned_to" name="assigned_to" 
+                                       placeholder="Nama lengkap karyawan" 
+                                       value="{{ task.assigned_to or '' }}" required>
+                            </div>
+                        </div>
+
+                        <!-- Departemen / Divisi -->
+                        <div class="col-12 col-md-6">
+                            <label for="department" class="form-label fw-semibold text-secondary small">
+                                Departemen / Divisi <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="department" name="department" required>
+                                <option value="" disabled {% if not task.department %}selected{% endif %}>Pilih Divisi...</option>
+                                {% for dept in departments_list %}
+                                    <option value="{{ dept }}" {% if task.department == dept %}selected{% endif %}>{{ dept }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <!-- Tingkat Prioritas -->
+                        <div class="col-12 col-md-4">
+                            <label for="priority" class="form-label fw-semibold text-secondary small">
+                                Prioritas <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="priority" name="priority" required>
+                                {% for prio in priorities_list %}
+                                    <option value="{{ prio }}" {% if task.priority == prio %}selected{% endif %}>
+                                        {{ prio }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Status Pengerjaan -->
+                        <div class="col-12 col-md-4">
+                            <label for="status" class="form-label fw-semibold text-secondary small">
+                                Status Pengerjaan <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="status" name="status" required>
+                                {% for st in statuses_list %}
+                                    <option value="{{ st }}" {% if task.status == st %}selected{% endif %}>
+                                        {{ st }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Batas Waktu / Target Selesai -->
+                        <div class="col-12 col-md-4">
+                            <label for="due_date" class="form-label fw-semibold text-secondary small">
+                                Batas Waktu <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white text-muted"><i class="fa-regular fa-calendar"></i></span>
+                                <input type="date" class="form-control" id="due_date" name="due_date" 
+                                       value="{{ task.due_date if task.due_date is string else (task.due_date.strftime('%Y-%m-%d') if task.due_date else '') }}" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                            <i class="fa-solid fa-arrow-left me-1"></i> Batal
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="fa-regular fa-floppy-disk me-1"></i> 
+                            {% if action == 'create' %}Simpan Tugas Baru{% else %}Simpan Perubahan{% endif %}
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
