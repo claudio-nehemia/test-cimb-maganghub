@@ -14,6 +14,13 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }, 6000);
     });
+
+    // 2. Setel lebar progress bar completion rate secara dinamis
+    const rateBars = document.querySelectorAll('.progress-bar[data-rate]');
+    rateBars.forEach(function (bar) {
+        const rate = parseFloat(bar.getAttribute('data-rate')) || 0;
+        bar.style.width = rate + '%';
+    });
 });
 
 /**
